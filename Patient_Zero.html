@@ -541,7 +541,7 @@ $('gobi').style.transition='none';$('gobi').style.width='0';g.classList.add('on'
 requestAnimationFrame(()=>requestAnimationFrame(()=>{g.classList.add('v');$('gobi').style.transition='width 2.6s linear';$('gobi').style.width='100%'}));
 try{if(AU.ctx&&AU.ctx.state==='running'&&snd())boom(AU.ctx.currentTime+.02,0)}catch(e){}
 try{if(!(S.set&&S.set.vib===false)&&navigator.vibrate)navigator.vibrate([80,60,160])}catch(e){}
-setTimeout(()=>{$('got').innerHTML='GAMEPLAY COMING SOON<br><small>The map is still being built...</small>';$('gob').style.display='none';$('gox').style.display='block'},2800)}
+setTimeout(()=>{startGame()},2800)}
 $('gox').onclick=()=>{$('go').classList.remove('v');setTimeout(()=>$('go').classList.remove('on'),500)};
 /* ===== controls customization (layout editor) ===== */
 const HD={joy:['JOYSTICK',14,60,100],sit:['SIT',92,34,100],run:['RUN',70,78,100],fire:['FIRE',85,58,100],pick:['PICK UP',66,54,100],map:['MAP',12,22,100]};
@@ -660,6 +660,105 @@ addEventListener('popstate',()=>{try{history.pushState({g:1},'')}catch(_){}
  if($('pn').classList.contains('pan')){$('ppx').click();return}
  if($('lobby').classList.contains('chv'))$('lobby').classList.remove('chv')});
 (function(){const g=document.createElement('script');g.src='https://accounts.google.com/gsi/client';g.async=true;g.onload=initG;document.head.appendChild(g)})();
+</script>
+<script>
+(function(){
+let GR=null;const CS=4,WH=3.2,W=24,H=16;let R=.4;
+const ROOMS=[[1,1,6,5],[8,1,14,5],[16,1,22,5],[1,10,6,14],[8,10,14,14],[16,10,22,14]],BR=[];
+const MAP=(()=>{const g=Array.from({length:H},()=>Array(W).fill(1));
+const c=(a,b,d,e)=>{for(let y=b;y<=e;y++)for(let x=a;x<=d;x++)g[y][x]=0};
+c(1,7,22,8);
+ROOMS.forEach(r=>c(...r));
+[3,11,19].forEach(x=>{c(x,6,x,6);c(x,9,x,9)});return g})();
+const solid=(x,z)=>{const c=Math.floor(x/CS),r=Math.floor(z/CS);return !MAP[r]||MAP[r][c]!==0};
+const gw=(x,z)=>{const c=Math.floor((x-GR.ox)/GR.res),r=Math.floor((z-GR.oz)/GR.res);if(c<0||r<0||c>=GR.w||r>=GR.h)return 0;const i=r*GR.w+c;return (GR.b[i>>3]>>(7-(i&7)))&1};
+const hit=(x,z)=>GR?[[-R,-R],[R,-R],[-R,R],[R,R]].some(a=>!gw(x+a[0],z+a[1])):[[-R,-R],[R,-R],[-R,R],[R,R]].some(a=>solid(x+a[0],z+a[1])||BR.some(b=>Math.abs(x+a[0]-b.x)<b.hw&&Math.abs(z+a[1]-b.z)<b.hl));
+function start(){
+ const go=$('go');go.classList.remove('v','on');
+ viewLibs().then(run).catch(()=>{alert('3D engine needs internet to load');show('lobby')})}
+window.startGame=start;
+function run(){
+ const T=THREE,box=document.createElement('div');
+ box.style.cssText='position:fixed;inset:0;z-index:99999;background:#000;touch-action:none;overflow:hidden';
+ box.innerHTML='<canvas style="width:100%;height:100%;display:block"></canvas><div id="gjb" style="position:absolute;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;background:#ffffff18;border:2px solid #ffffff44;display:none"></div><div id="gjk" style="position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:#ffffffaa;display:none"></div><button id="gex" style="position:absolute;left:14px;top:14px;padding:8px 14px;font-size:13px">EXIT</button><div style="position:absolute;right:14px;top:16px;color:#e8c15a;font:800 14px system-ui;text-shadow:0 2px 6px #000">ABANDONED HOSPITAL</div>';
+ document.body.appendChild(box);
+ const cv=box.firstChild,r=new T.WebGLRenderer({canvas:cv,antialias:false});
+ r.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
+ const sc=new T.Scene();sc.background=new T.Color(0x020203);sc.fog=new T.FogExp2(0x020203,.045);
+ const cam=new T.PerspectiveCamera(70,1,.1,60);cam.rotation.order='YXZ';sc.add(cam);
+ const size=()=>{const w=box.clientWidth,h=box.clientHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()};size();addEventListener('resize',size);
+ const tex=(b,l,rx,ry)=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle=b;g.fillRect(0,0,128,128);
+  for(let i=0;i<50;i++){g.fillStyle='rgba(70,55,30,'+Math.random()*.08+')';g.fillRect(Math.random()*128,Math.random()*128,15+Math.random()*35,15+Math.random()*35)}
+  g.strokeStyle=l;g.lineWidth=3;g.strokeRect(0,0,128,128);
+  const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rx,ry);return t};
+ const fl=new T.Mesh(new T.PlaneGeometry(W*CS,H*CS),new T.MeshLambertMaterial({map:tex('#ecece8','#a0a09a',W*2,H*2)}));
+ fl.rotation.x=-Math.PI/2;fl.position.set(W*CS/2,0,H*CS/2);sc.add(fl);
+ const ce=new T.Mesh(new T.PlaneGeometry(W*CS,H*CS),new T.MeshLambertMaterial({map:tex('#d8d8d2','#b0b0aa',W*2,H*2)}));
+ ce.rotation.x=Math.PI/2;ce.position.set(W*CS/2,WH,H*CS/2);sc.add(ce);
+ const cells=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(MAP[y][x]===1&&[[1,0],[-1,0],[0,1],[0,-1]].some(d=>MAP[y+d[1]]&&MAP[y+d[1]][x+d[0]]===0))cells.push([x,y]);
+ const wm=new T.InstancedMesh(new T.BoxGeometry(CS,WH,CS),new T.MeshLambertMaterial({map:tex('#dfe6df','#8f9a8f',1,1)}),cells.length),d=new T.Object3D();
+ cells.forEach((c,i)=>{d.position.set(c[0]*CS+CS/2,WH/2,c[1]*CS+CS/2);d.updateMatrix();wm.setMatrixAt(i,d.matrix)});sc.add(wm);
+ sc.add(new T.AmbientLight(0x303848,.35));
+ const L=[];const lamp=(cx,cy,col,it,dist)=>{const l=new T.PointLight(col,it,dist);l.position.set(cx*CS,WH-.5,cy*CS);l.userData.b=it;sc.add(l);L.push(l)};
+ lamp(6,8,0xfff4e0,1.1,18);lamp(17,8,0xfff4e0,1.1,18);   // lit corridor
+ lamp(11.5,3.5,0xfff4e0,1,16);lamp(19.5,12.5,0xe8f0ff,1,16); // lit rooms
+ lamp(3.5,3.5,0x6070a0,.35,10);lamp(11.5,12.5,0xa05050,.3,10); // dim rooms
+ const sp=new T.SpotLight(0xfff2d0,1.7,32,.55,.5);sp.position.set(0,0,0);sp.target.position.set(0,0,-1);cam.add(sp);cam.add(sp.target);
+
+ const loadBeds=()=>{
+ // hospital beds: model is stored in 3 lossless parts (GitHub web upload limit is 25 MB per file)
+ const msg=document.createElement('div');msg.style.cssText='position:absolute;left:0;right:0;bottom:12px;text-align:center;color:#ddd;font:700 13px system-ui;text-shadow:0 2px 6px #000';msg.textContent='Loading hospital beds (49 MB)...';box.appendChild(msg);
+ const base=location.pathname.replace(/[^\/]*$/,'');
+ Promise.all([1,2,3].map(i=>fetch(base+'hospital_bed.part'+i).then(x=>{if(!x.ok)throw 0;return x.arrayBuffer()}))).then(ps=>{
+  const buf=new Uint8Array(ps.reduce((a,b)=>a+b.byteLength,0));let o=0;ps.forEach(b=>{buf.set(new Uint8Array(b),o);o+=b.byteLength});
+  new T.GLTFLoader().parse(buf.buffer,'',g=>{
+   const m=g.scene,bb=new T.Box3().setFromObject(m),sz=bb.getSize(new T.Vector3()),ct=bb.getCenter(new T.Vector3()),k=2/Math.max(sz.x,sz.y,sz.z);
+   m.position.set(-ct.x,-bb.min.y,-ct.z);const w=new T.Group();w.add(m);w.scale.setScalar(k);
+   const bw=sz.x*k,bl=sz.z*k;
+   ROOMS.forEach(rm=>{const north=rm[1]<6;[rm[0]*CS+3.5,(rm[2]+1)*CS-3.5].forEach(x=>{
+    const z=north?rm[1]*CS+bl/2+.4:(rm[3]+1)*CS-bl/2-.4,b=w.clone(true);b.position.set(x,0,z);sc.add(b);BR.push({x:x,z:z,hw:bw/2+.15,hl:bl/2+.15})})});
+   msg.remove()},()=>{msg.textContent='Bed model could not be read'})
+ }).catch(()=>{msg.textContent='Beds not found (needs internet + the 3 bed files uploaded)';setTimeout(()=>msg.remove(),4000)});
+ };
+ const p={x:2.5*CS,z:8*CS,yaw:-Math.PI/2,pit:0};
+
+ const GJ={"ox": -37.5, "oz": -16.0, "res": 0.2, "w": 376, "h": 166, "fy": 6.3, "sx": 2.0, "sz": -10.7, "yaw": 4.974188368183839, "d": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////wAAAAAAAP/gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////AAAAAAAA/+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////8AAAAAAAD/4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////wA/////////8D/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////AD/////////wf/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////8AP///////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////wA////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////AD////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////8AP///////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////4A////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////wD////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////gP///////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////A////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////8D////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////wP///////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/////Af///////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////AA////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////8AD///////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////wAP///////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////AA////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////8AH////////wA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////wA////////+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////AD////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////8AP////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////wA////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////AD////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB////8AP////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////wA////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////8D////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////wP////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////+A////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////wD////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////+AP////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////wAf//////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////AB///////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////8AH//////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////wAf//////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////AB//D/4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////8AP/8P/gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////wA//w/+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/////AD//D/4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4AAAP/8P/gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/gAAB//w/+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf+AAAP//D/4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB/4AAB//8P/gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/A//////w///w/+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+H//////D///DAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////8P//8IAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD////////w///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////////D///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB////////8P//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////////w///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////////D///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB////////8P//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////////w///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////////D///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB////////8P//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////////w///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////////D///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB////////8P//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////////w///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf////////D///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB////////8P//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////////w///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////////D///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////8P//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD////////w///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////////D///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////8P//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD////////w///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH////AAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///8AAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf///wAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="};
+ const mm=document.createElement('div');mm.style.cssText='position:absolute;left:0;right:0;bottom:12px;text-align:center;color:#ddd;font:700 13px system-ui;text-shadow:0 2px 6px #000';mm.textContent='Loading hospital (69 MB), please wait...';box.appendChild(mm);
+ const mb=location.pathname.replace(/[^\/]*$/,'');
+ Promise.all([1,2,3,4,5].map(i=>fetch(mb+'hospital_map.part'+i).then(x=>{if(!x.ok)throw 0;return x.arrayBuffer()}))).then(ps=>{
+  const buf=new Uint8Array(ps.reduce((a,b)=>a+b.byteLength,0));let o=0;ps.forEach(b=>{buf.set(new Uint8Array(b),o);o+=b.byteLength});ps.length=0;
+  mm.textContent='Building hospital...';
+  new T.GLTFLoader().parse(buf.buffer,'',g=>{
+   sc.remove(fl,ce,wm);L.forEach(l=>sc.remove(l));L.length=0;
+   sc.add(g.scene);sc.background=new T.Color(0x05060a);sc.fog=new T.FogExp2(0x05060a,.03);
+   sc.add(new T.HemisphereLight(0x8899aa,0x222226,.7));cam.add(new T.PointLight(0xffe8c0,.6,9));
+   const s=atob(GJ.d),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);
+   GR={ox:GJ.ox,oz:GJ.oz,res:GJ.res,w:GJ.w,h:GJ.h,fy:GJ.fy,b:u};R=.3;p.x=GJ.sx;p.z=GJ.sz;p.yaw=GJ.yaw;
+   mm.remove()},()=>{mm.textContent='Hospital file could not be read';loadBeds()})
+ }).catch(()=>{mm.textContent='Hospital not found, using the small test map';setTimeout(()=>mm.remove(),4000);loadBeds()});
+ const q=e=>innerHeight>innerWidth?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};
+ let js=null,lk=null,jo={x:0,y:0},lp={x:0,y:0},jv={x:0,y:0};const jb=box.querySelector('#gjb'),jk=box.querySelector('#gjk');
+ const place=(el,x,y)=>{el.style.left=x+'px';el.style.top=y+'px'};
+ box.addEventListener('touchstart',e=>{if(e.target.id==='gex')return;e.preventDefault();for(const t of e.changedTouches){const a=q(t);
+  if(a.x<box.clientWidth*.5){if(js==null){js=t.identifier;jo=a;jv={x:0,y:0};place(jb,a.x,a.y);place(jk,a.x,a.y);jb.style.display=jk.style.display='block'}}
+  else if(lk==null){lk=t.identifier;lp=a}}},{passive:false});
+ box.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches){const a=q(t);
+  if(t.identifier===js){let dx=a.x-jo.x,dy=a.y-jo.y;const m=Math.hypot(dx,dy),mx=50;if(m>mx){dx*=mx/m;dy*=mx/m}jv={x:dx/mx,y:dy/mx};place(jk,jo.x+dx,jo.y+dy)}
+  else if(t.identifier===lk){p.yaw-=(a.x-lp.x)*.006;p.pit=Math.max(-1,Math.min(1,p.pit-(a.y-lp.y)*.005));lp=a}}},{passive:false});
+ const end=e=>{for(const t of e.changedTouches){if(t.identifier===js){js=null;jv={x:0,y:0};jb.style.display=jk.style.display='none'}if(t.identifier===lk)lk=null}};
+ box.addEventListener('touchend',end);box.addEventListener('touchcancel',end);
+ let raf,last=performance.now(),on=true;
+ const loop=n=>{if(!on)return;const dt=Math.min(.05,(n-last)/1000);last=n;
+  const sy=Math.sin(p.yaw),cy=Math.cos(p.yaw),f=-jv.y,s=jv.x,v=4.2*dt;
+  const nx=p.x+(-sy*f+cy*s)*v,nz=p.z+(-cy*f-sy*s)*v;
+  if(!hit(nx,p.z))p.x=nx;if(!hit(p.x,nz))p.z=nz;
+  cam.position.set(p.x,(GR?GR.fy:0)+1.6+Math.sin(n/140)*.03*Math.hypot(jv.x,jv.y),p.z);cam.rotation.set(p.pit,p.yaw,0);
+  L.forEach((l,i)=>{l.intensity=l.userData.b*(Math.random()<.02?.3:1)});
+  r.render(sc,cam);raf=requestAnimationFrame(loop)};
+ raf=requestAnimationFrame(loop);
+ box.querySelector('#gex').onclick=()=>{on=false;cancelAnimationFrame(raf);removeEventListener('resize',size);r.dispose();box.remove();BR.length=0;GR=null;R=.4;show('lobby')};
+}
+})();
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";

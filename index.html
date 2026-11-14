@@ -722,7 +722,7 @@ function showPriv(){const lk=(f,t)=>'<a href="'+PZ_BASE+f+'" target="_blank" rel
  ['RULES',['Chat: no abuse, hate or sharing personal details.','Players under 13 are not allowed.']],
  ['FULL TEXTS',[lk('privacy.html','Privacy Policy'),lk('terms.html','Terms of Use'),lk('delete-account.html','Delete account page')]]])}
 const fb=document.createElement('button');fb.id='frb';fb.type='button';fb.textContent='\u{1F465}';fb.setAttribute('aria-label','Friends');$('lobby').appendChild(fb);fb.onclick=showFr;
-const PZ_AV='2026-11-14a',PZ_BASE=location.pathname.replace(/[^\/]*$/,''),PZ_FILES=[['hospital_map.part',5,69e6],['hospital_two_lite.part',2,45e6],['hospital_bed.part',3,49e6]],
+const PZ_AV='2026-11-14b',PZ_BASE=location.pathname.replace(/[^\/]*$/,''),PZ_FILES=[['hospital_map.part',5,69e6],['hospital_two_lite.part',2,45e6],['hospital_bed.part',3,49e6]],
  PZ_OPT=[['char_dusk.glb',4e6],['char_skrag.glb',4e6],['char_tavo.glb',4e6],['item_key.glb',1e6],['military_can.glb',1e6],['item_gascan.glb',1e6],['item_pistol.glb',1e6],['item_flamegun.glb',1e6],['item_generator.glb',1e6],['item_torch.part1',1e6],['item_torch.part2',1e6],['hospitaldoor_double_swing.part1',13.52e6],['hospitaldoor_double_swing.part2',13.52e6]];
 /* ===== REAL ADS: Google AdSense "H5 Games Ads" (rewarded). Leave client EMPTY until Google has approved your site AND the H5 Games Ads beta.
    Then put your publisher id here, e.g. client:'ca-pub-1234567890123456'. While it is empty, the old 5-second demo ad runs. Set test:false when you go live. */
@@ -895,7 +895,9 @@ function run(){
    sc.add(new T.HemisphereLight(0x8899aa,0x222226,.7));cam.add(new T.PointLight(0xffe8c0,.6,9));
    const Ls=GJ.L.map(b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u});
    GR={ox:GJ.ox,oz:GJ.oz,res:GJ.res,w:GJ.w,h:GJ.h,y:GJ.fy,L:h2?Ls:Ls.slice(0,2)};R=.3;p.x=GJ.sx;p.z=GJ.sz;p.yaw=GJ.yaw;spawnOff();p.ey=GR.y+1.6;
-   if(h2)mm.remove();else{mm.style.color='#ff8a80';mm.textContent='HOSPITAL 2 NOT LOADED: '+(window.__h2err||'unknown')}
+   if(h2)mm.remove();else{mm.style.color='#ff8a80';mm.textContent='HOSPITAL 2 NOT LOADED: '+(window.__h2err||'unknown')};
+   /* TEMP DEBUG: coordinates + teleport buttons. Delete this block when finished. */
+   {const hud=document.createElement('div');hud.style.cssText='position:absolute;left:14px;top:58px;color:#7CFC00;font:700 12px system-ui;text-shadow:0 1px 4px #000;z-index:5';const mk=(t,x,z,y,top)=>{const b=document.createElement('button');b.textContent=t;b.style.cssText='position:absolute;left:14px;top:'+top+'px;padding:8px 12px;font-size:12px;z-index:5';b.onclick=()=>{GR.y=y;p.x=x;p.z=z;p.ey=y+1.6};box.appendChild(b)};box.appendChild(hud);mk('TO BRIDGE',23,2.1,6.4,86);mk('TO HOSPITAL 2',40,5.9,6.4,128);const di=setInterval(()=>{if(!box.isConnected){clearInterval(di);return}hud.textContent='x '+p.x.toFixed(1)+'  z '+p.z.toFixed(1)+'  y '+GR.y.toFixed(1)+(h2?'  H2 loaded':'  H2 MISSING')},250)}
  }).catch(()=>{mm.textContent='Hospital could not be loaded, using the small test map';setTimeout(()=>mm.remove(),4000);loadBeds()});
  const q=e=>innerHeight>innerWidth?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};
  let js=null,lk=null,jo={x:0,y:0},lp={x:0,y:0},jv={x:0,y:0};const jb=box.querySelector('#gjb'),jk=box.querySelector('#gjk');

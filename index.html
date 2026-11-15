@@ -803,7 +803,7 @@ ROOMS.forEach(r=>c(...r));
 [3,11,19].forEach(x=>{c(x,6,x,6);c(x,9,x,9)});return g})();
 const solid=(x,z)=>{const c=Math.floor(x/CS),r=Math.floor(z/CS);return !MAP[r]||MAP[r][c]!==0};
 /* multi-level floors: GR.L[k][cell]=0 (none) or height*10+1. fh returns the floor height near y (max step .3) or null */
-const fh=(x,z,y)=>{const c=Math.floor((x-GR.ox)/GR.res),r=Math.floor((z-GR.oz)/GR.res);if(c<0||r<0||c>=GR.w||r>=GR.h)return null;const i=r*GR.w+c;let b=null,bd=.3001;for(let k=0;k<GR.L.length;k++){const v=GR.L[k][i];if(!v)continue;const h=(v-1)*.1,d=Math.abs(h-y);if(d<=bd){bd=d;b=h}}return b};
+const fh=(x,z,y)=>{const c=Math.floor((x-GR.ox)/GR.res),r=Math.floor((z-GR.oz)/GR.res);if(c<0||r<0||c>=GR.w||r>=GR.h)return null;const i=r*GR.w+c;let b=null,bd=.6001;for(let k=0;k<GR.L.length;k++){const v=GR.L[k][i];if(!v)continue;const h=(v-1)*.1,d=Math.abs(h-y);if(d<=bd){bd=d;b=h}}return b};
 const hit0=(x,z)=>GR?[[-R,-R],[R,-R],[-R,R],[R,R]].some(a=>fh(x+a[0],z+a[1],GR.y)===null):[[-R,-R],[R,-R],[-R,R],[R,R]].some(a=>solid(x+a[0],z+a[1])||BR.some(b=>Math.abs(x+a[0]-b.x)<b.hw&&Math.abs(z+a[1]-b.z)<b.hl));
 const hit=(x,z)=>hit0(x,z)||!!(window.__pz&&__pz.gb&&__pz.gb(x,z));
 window.pzHosp=function(){if(window.__pzH)return window.__pzH;

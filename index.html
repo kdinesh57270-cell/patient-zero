@@ -824,11 +824,13 @@ function pzAddH2(h2,sc){const T=THREE,G=new T.Group();G.add(h2.scene.clone(true)
  ramp(-14.2,19.0,9.7,18.3,1.5,10.3,6.0);ramp(-8.5,18.0,-8.5,1.0,1.0,10.3,6.0);
  [[18.6,1.2],[5.2,40.7]].forEach(a=>{const m=new T.Mesh(new T.BoxGeometry(.8,.1,.8),mat);m.position.set(a[0],5.95,a[1]);G.add(m)});
  G.rotation.y=Math.PI/2;G.position.set(36.1,.4,-6.4);sc.add(G);pzOpenWalls(G,36.0,38.8,6.0,9.2,0.85,3.35,1.0,4.5);
- const br=new T.Mesh(new T.BoxGeometry(13.7,.2,2.5),new T.MeshStandardMaterial({color:0x6a7078,emissive:0x1c2128,roughness:.9}));br.position.set(30.15,6.3,2.1);sc.add(br);
+ const br=new T.Mesh(new T.BoxGeometry(6.6,.2,2.5),new T.MeshStandardMaterial({color:0x6a7078,emissive:0x1c2128,roughness:.9}));br.position.set(26.6,6.3,2.1);sc.add(br);
   const gl=new T.MeshBasicMaterial({color:0xe8c15a}),rl=new T.MeshStandardMaterial({color:0x4a4f58,emissive:0x15181c,roughness:.8}),gr=new T.MeshBasicMaterial({color:0x44ff66});
-  [.88,3.32].forEach(z=>{const s=new T.Mesh(new T.BoxGeometry(13.7,.03,.12),gl);s.position.set(30.15,6.41,z<2?.95:3.25);sc.add(s);const r=new T.Mesh(new T.BoxGeometry(13.7,.9,.06),rl);r.position.set(30.15,6.85,z);sc.add(r);const t=new T.Mesh(new T.BoxGeometry(13.7,.05,.08),gl);t.position.set(30.15,7.32,z);sc.add(t)});
-  [24.0,36.6].forEach(x=>{const b=new T.Mesh(new T.BoxGeometry(.12,.12,2.5),gr);b.position.set(x,8.2,2.1);sc.add(b)});
-  pzRampVis(sc);pzOpenWalls(G,30.4,32.4,6.0,9.0,-9.6,-6.4,1.0,4.5);pzTube(sc,22.6,6.4,37.6,6.4,2.1,1.25,2.7);pzTube(sc,19.0,1.3,31.6,6.4,-8.0,1.2,2.6);pzHole(G,36.0,38.6,6.45,9.0,.85,3.35);pzHole(G,30.4,32.0,6.45,9.0,-9.2,-6.8);
+  [.88,3.32].forEach(z=>{const s=new T.Mesh(new T.BoxGeometry(6.6,.03,.12),gl);s.position.set(26.6,6.41,z<2?.95:3.25);sc.add(s);const r=new T.Mesh(new T.BoxGeometry(6.6,.9,.06),rl);r.position.set(26.6,6.85,z);sc.add(r);const t=new T.Mesh(new T.BoxGeometry(6.6,.05,.08),gl);t.position.set(26.6,7.32,z);sc.add(t)});
+  [24.0,29.5].forEach(x=>{const b=new T.Mesh(new T.BoxGeometry(.12,.12,2.5),gr);b.position.set(x,8.2,2.1);sc.add(b)});
+  pzRampVis(sc);pzOpenWalls(G,30.4,32.4,6.0,9.0,-9.6,-6.4,1.0,4.5);pzTube(sc,22.6,6.4,29.9,6.4,2.1,1.25,2.7);pzTube(sc,19.0,1.3,31.6,6.4,-8.0,1.2,2.6);pzHole(G,36.0,38.6,6.45,9.0,.85,3.35);pzHole(G,30.4,32.0,6.45,9.0,-9.2,-6.8);
+  /* upper bridge entry: the hospital-2 wall + window frame + glass are at x 28.1-28.6; cut exactly the bridge cross-section (z .85-3.35, up to the tube roof) */
+  pzHole(G,28.0,28.8,6.45,9.1,.85,3.35);
   /* lower-bridge entry into hospital 2 (x 31.4): cover the old window wall around the opening with plain wall so it is a clean doorway, not a window */
   const pm=new T.MeshStandardMaterial({color:0x3a3f46,emissive:0x14171b,roughness:.95});
   [[31.28,6.3,-11.7,31.53+0,10.3,-9.2],[31.28,6.3,-6.8,31.53,10.3,-5.6],[31.28,9.0,-9.2,31.53,10.3,-6.8]].forEach(a=>{const w=new T.Mesh(new T.BoxGeometry(.5,a[4]-a[1],a[5]-a[2]),pm);w.position.set(31.28,(a[1]+a[4])/2,(a[2]+a[5])/2);sc.add(w)})}
@@ -935,6 +937,8 @@ function run(){
    g.scene.traverse(o=>{if(/^door0_SM00[1234]/.test(o.name))o.visible=false});sc.add(g.scene);if(h2){pzOpenWalls(g.scene,22.0,24.6,6.0,9.2,0.85,3.35,1.0,4.5);pzOpenWalls(g.scene,17.4,20.4,1.0,4.4,-9.6,-6.4,0.9,4.5);pzHole(g.scene,22.6,24.8,6.45,9.0,.85,3.35);pzHole(g.scene,17.6,19.8,1.35,4.0,-9.2,-6.8);pzAddH2(h2,sc)}sc.background=new T.Color(0x05060a);sc.fog=new T.FogExp2(0x05060a,.03*GQ.fog);
    sc.add(new T.HemisphereLight(0x8899aa,0x222226,.7));if(GQ.lt)cam.add(new T.PointLight(0xffe8c0,.6,9));
    const Ls=GJ.L.map(b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u});
+   /* open the doorways of the hidden inner room doors in the walk grid: [layer,cell,height] triples */
+   try{const PP=[2,295949,108,2,300240,108,2,295950,108,2,300241,108,2,295951,108,2,300242,108,2,272655,108,2,276946,108,2,272656,108,2,276947,108,2,272657,108,2,276948,108,2,249361,108,2,253652,108,2,249362,108,2,253653,108,2,249363,108,2,253654,108,2,226067,108,2,230358,108,2,226068,108,2,230359,108,2,226069,108,2,230360,108,2,226045,108,2,230336,108,2,226046,108,2,230337,108,2,226047,108,2,230338,108,2,249339,108,2,253630,108,2,249340,108,2,253631,108,2,249341,108,2,253632,108,2,272633,108,2,276924,108,2,272634,108,2,276925,108,2,272635,108,2,276926,108,2,295927,108,2,300218,108,2,295928,108,2,300219,108,2,295929,108,2,300220,108,2,136494,65,2,150130,65,2,150131,64,2,150132,64,2,150133,64,2,150134,64,2,150135,64,2,150136,64,2,150137,64,2,150743,65,2,150744,65];for(let q=0;q<PP.length;q+=3){const a=Ls[PP[q]];if(a&&!a[PP[q+1]])a[PP[q+1]]=PP[q+2]}}catch(e){}
    GR={ox:GJ.ox,oz:GJ.oz,res:GJ.res,w:GJ.w,h:GJ.h,y:GJ.fy,L:h2?Ls.concat([pzRampLayer(GJ,Ls)]):Ls.slice(0,2)};R=.3;p.x=GJ.sx;p.z=GJ.sz;p.yaw=GJ.yaw;spawnOff();p.ey=GR.y+1.6;
    if(h2)mm.remove();else{mm.style.color='#ff8a80';mm.textContent='HOSPITAL 2 NOT LOADED: '+(window.__h2err||'unknown')};
  }).catch(()=>{mm.textContent='Hospital could not be loaded, using the small test map';setTimeout(()=>mm.remove(),4000);loadBeds()});
@@ -1152,8 +1156,11 @@ const release=()=>{if(!PZP.on||!PZP.h)return;PZP.h=0;if(PZP.lk>0||PZP.lv<=0)retu
  PZP.lk=.5;zone();q$('#pzm').textContent='GOOD! Next canister';q$('#pzt').textContent='FUEL THE GENERATOR  '+(PZP.r+1)+'/3'};
 {const b=q$('#pzp');b.onpointerdown=ev=>{ev.preventDefault();if(PZP.on)PZP.h=1};b.onpointerup=b.onpointercancel=b.onpointerleave=release;
  q$('#pzc').onpointerdown=ev=>{ev.preventDefault();closeP()}}
+/* bullets: only with the PISTOL in hand, and only one pack at a time (next pack only when 2 or fewer bullets are left) */
+const AMMO_LOW=2,ammoWhy=()=>!has('Pistol')?'Take the PISTOL in your hand first to pick up BULLETS':((Z.ammo|0)>AMMO_LOW?'You still have bullets - use them first':'');
 const pzPick=()=>{if(Z.done||Z.mf||Z.pzOn)return;const f=near();if(!f)return;
  if(f.k==='i'){const it=f.o,t=it.t,cg=!!(Z.got.Pistol||Z.got['Fire Gun']||eq('Pistol')||eq('Fire Gun'));
+  if(t==='ammo'){const w=ammoWhy();if(w){say(w);return}}
   if(t==='key'&&Z.keys>=1){say('You already carry a KEY - drop it from BAG first');return}
   if(t==='diesel'&&Z.diesel>=1){say('You already carry a DIESEL CAN - drop it from BAG first');return}
   if((t==='pistol'||t==='firegun')&&cg){say('You already carry a GUN - drop it from BAG first');return}
@@ -1166,7 +1173,7 @@ let lastH='';
 const itemsTick=(dt,n)=>{
  for(const it of Z.items){if(it.got)continue;it.s.rotation.y+=dt*1.6;it.s.position.y=.55+Math.sin(n/320+it.x)*.07}
  let h='';
- if(!Z.mf&&!Z.pzOn){const f=near();if(f){if(f.k==='i')h='TAP PICK UP: '+PZN[f.o.t];else{const g=f.o;h=g.on?'GENERATOR RUNNING':Z.keys<1?'GENERATOR - needs a KEY':Z.diesel<1?'GENERATOR - needs a DIESEL CAN':'TAP PICK UP: START GENERATOR'}}}
+ if(!Z.mf&&!Z.pzOn){const f=near();if(f){if(f.k==='i')h=f.o.t==='ammo'&&ammoWhy()?ammoWhy():'TAP PICK UP: '+PZN[f.o.t];else{const g=f.o;h=g.on?'GENERATOR RUNNING':Z.keys<1?'GENERATOR - needs a KEY':Z.diesel<1?'GENERATOR - needs a DIESEL CAN':'TAP PICK UP: START GENERATOR'}}}
  if(h!==lastH){lastH=h;hint.textContent=h}
  const gun=['Pistol','Fire Gun','Flashlight'].filter(has).join(', ');
  inv.textContent='KEYS '+Z.keys+'   DIESEL '+Z.diesel+'   PETROL '+Math.floor(Z.fuel)+(has('Pistol')?'   BULLETS '+(Z.ammo|0):'')+(gun?'\nGEAR: '+gun:'');
